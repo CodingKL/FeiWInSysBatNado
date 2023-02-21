@@ -99,7 +99,69 @@ function log()
      [ $LOG_OPEN -eq 1 ]  && echo "$(date '+%Y-%m-%d %H:%M:%S') $@" 
 } 
 
+需要开启日志的时候，把 LOG_OPEN 设置为1，关闭日志打印，设置为0即可
 
+
+------------------------------------------------------------------------------------------------------------
+日志等级
+
+在不同的脚本逻辑中，打印的日志应该有不同的作用，有些是临时变量值的输出，
+作为调试用的，有些是一些状态转换或者达到不同阶段的提示信息，还有些是严重的错误，需要重点输出并提醒用户
+
+以上这些可以通过日志等级来实现，把日志划分等级，不同的等级屏幕上输出不同的颜色，便于查看，直接来看修改后的 t.sh 脚本内容吧
+
+#!/bin/bash 
+ 
+#日志级别 debug-1, info-2, warn-3, error-4, always-5 
+LOG_LEVEL=3 
+ 
+#调试日志 
+function log_debug(){ 
+  content="[DEBUG] $(date '+%Y-%m-%d %H:%M:%S') $@" 
+  [ $LOG_LEVEL -le 1  ] && echo -e "\033[32m"  ${content}  "\033[0m" 
+} 
+#信息日志 
+function log_info(){ 
+  content="[INFO] $(date '+%Y-%m-%d %H:%M:%S') $@" 
+  [ $LOG_LEVEL -le 2  ] && echo -e "\033[32m"  ${content} "\033[0m" 
+} 
+#警告日志 
+function log_warn(){ 
+  content="[WARN] $(date '+%Y-%m-%d %H:%M:%S') $@" 
+  [ $LOG_LEVEL -le 3  ] && echo -e "\033[33m" ${content} "\033[0m" 
+} 
+#错误日志 
+function log_err(){ 
+  content="[ERROR] $(date '+%Y-%m-%d %H:%M:%S') $@" 
+  [ $LOG_LEVEL -le 4  ] && echo -e "\033[31m" ${content} "\033[0m" 
+} 
+#一直都会打印的日志 
+function log_always(){ 
+   content="[ALWAYS] $(date '+%Y-%m-%d %H:%M:%S') $@" 
+   [ $LOG_LEVEL -le 5  ] && echo -e  "\033[32m" ${content} "\033[0m" 
+} 
+
+把日志级别分成 5 个等级，分别是 : 
+	debug日志、
+	info日志、
+	警告日志、
+	错误日志、
+	一直都打印的日志 ，
+
+每个级别对应一个函数接口，而且每个级别可以定义不同的字符颜色，
+方便在屏幕上查看错误以及警告，
+上述脚本中错误日志是红色，警告日志是黄色，其他级别的日志是绿色
+
+修改 ta.sh 脚本, 内容如下
+#!/bin/bash 
+ 
+source ./t.sh 
+ 
+log_debug "this is debug log..." 
+log_info "this is info log..." 
+log_warn "this is warn log..." 
+log_err "this is error log..." 
+log_always "this is always log.." 
 
 ------------------------------------------------------------------------------------------------------------
 
